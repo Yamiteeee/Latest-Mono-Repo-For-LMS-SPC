@@ -1,0 +1,10 @@
+# Node backend
+lms-backend/node_modules
+lms-backend/.env
+lms-backend/dist
+
+# Frontend (Next.js)
+lms/.next
+lms/node_modules
+lms/.env.local
+lms/.env
