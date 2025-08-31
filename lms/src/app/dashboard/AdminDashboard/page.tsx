@@ -1,6 +1,6 @@
 "use client";
 
-import Layout from "../components/Layout";
+import Layout from "./Layout";
 import Image from "next/image";
 import {
   FaBook,
@@ -11,9 +11,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
-//testing commit for new repo
-
-// Admin Dashboard Stats (mocked for now, later we fetch from backend)
+// Admin Dashboard Stats (mocked for now, later fetch from backend)
 const stats = [
   {
     title: "Total Students",
@@ -41,11 +39,7 @@ const stats = [
   },
 ];
 
-interface DashboardProps {
-  isVisible?: boolean;
-}
-
-const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
+const AdminDashboard: React.FC = () => {
   const [firstRender, setFirstRender] = useState(true);
 
   useEffect(() => {
@@ -53,15 +47,48 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
   }, []);
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <div className="w-full h-full">
-          <Layout>
-            <div className="p-6">
-              <h1 className="text-3xl font-bold mb-8 text-black">
-                Admin Dashboard
-              </h1>
+    <Layout>
+      <AnimatePresence>
+        {!firstRender && (
+          <div className="w-full h-full">
+            {/* Hero Section */}
+                        <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="relative h-60 w-full overflow-hidden mb-8 shadow-lg"
+              >
+                <Image
+                  src="/assets/spc-background.avif"
+                  alt="San Pablo City Background"
+                  layout="fill"
+                  objectFit="cover"
+                  quality={100}
+                  className="z-0"
+                />
+                {/* Added a black overlay with opacity for better text readability */}
+                <div className="absolute inset-0 bg-black opacity-50 z-10"></div>
 
+                <div className="relative z-20 flex flex-col items-center justify-center h-full text-white p-6">
+                  {/* Added the logo here */}
+                  <Image
+                    src="/assets/SPCLOGO.avif"
+                    alt="San Pablo City Logo"
+                    width={80}
+                    height={80}
+                    className="mb-4 drop-shadow-lg"
+                  />
+                  <h1 className="text-5xl font-extrabold mb-3 text-center drop-shadow-lg">
+                    Admin Dashboard
+                  </h1>
+                  <p className="text-lg text-center drop-shadow-md">
+                    Welcome to your LMS in San Pablo City, Laguna.
+                  </p>
+                </div>
+              </motion.div>
+            
+
+            <div className="p-6">
               {/* Stat Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                 {stats.map((stat, index) => (
@@ -97,10 +124,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Top Performing Students */}
                 <div className="bg-white rounded-xl shadow p-5">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                  <h2 className="text-xl font-semibold mb-4 text-black">
                     Top Performing Students
                   </h2>
-                  <ul className="space-y-3">
+                  <ul className="space-y-3 text-black">
                     <li className="flex justify-between">
                       <span>John Doe</span>
                       <span className="font-bold text-green-600">95%</span>
@@ -118,10 +145,10 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
 
                 {/* Teacher Activity */}
                 <div className="bg-white rounded-xl shadow p-5">
-                  <h2 className="text-xl font-semibold mb-4 text-gray-800">
+                  <h2 className="text-xl font-semibold mb-4 text-black">
                     Recent Teacher Activity
                   </h2>
-                  <ul className="space-y-3">
+                  <ul className="space-y-3 text-black">
                     <li>
                       <span className="font-semibold">Mr. Adams</span> uploaded
                       new course material
@@ -138,11 +165,11 @@ const Dashboard: React.FC<DashboardProps> = ({ isVisible = true }) => {
                 </div>
               </div>
             </div>
-          </Layout>
-        </div>
-      )}
-    </AnimatePresence>
+          </div>
+        )}
+      </AnimatePresence>
+    </Layout>
   );
 };
 
-export default Dashboard;
+export default AdminDashboard;

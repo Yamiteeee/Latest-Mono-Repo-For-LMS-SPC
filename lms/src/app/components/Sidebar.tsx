@@ -14,26 +14,55 @@ import {
   FaBars,
   FaChevronLeft,
   FaSignOutAlt,
+  FaChalkboardTeacher,
+  FaTasks,
+  FaAward,
+  FaGraduationCap,
+  FaChartBar,
 } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  role?: "admin" | "teacher" | "student";
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ role = "student", collapsed, onToggle }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const menuItems = [
+  let menuItems = [
     { name: "Dashboard", path: "/dashboard", icon: <FaTachometerAlt /> },
-    { name: "Courses", path: "/dashboard/courses", icon: <FaBook /> },
-    { name: "Students", path: "/dashboard/students", icon: <FaUsers /> },
-    { name: "Reports", path: "/dashboard/reports", icon: <FaFileAlt /> },
-    { name: "Settings", path: "/dashboard/settings", icon: <FaCog /> },
   ];
 
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
+  if (role === "admin") {
+    menuItems = [
+      ...menuItems,
+      { name: "Courses", path: "/dashboard/courses", icon: <FaBook /> },
+      { name: "Students", path: "/dashboard/students", icon: <FaUsers /> },
+      { name: "Reports", path: "/dashboard/reports", icon: <FaFileAlt /> },
+      { name: "Settings", path: "/dashboard/settings", icon: <FaCog /> },
+    ];
+  } else if (role === "teacher") {
+    menuItems = [
+      ...menuItems,
+      { name: "My Classes", path: "/dashboard/classes", icon: <FaChalkboardTeacher /> },
+      { name: "Assignments", path: "/dashboard/assignments", icon: <FaTasks /> },
+      { name: "Grades", path: "/dashboard/grades", icon: <FaAward /> },
+      { name: "Settings", path: "/dashboard/settings", icon: <FaCog /> },
+    ];
+  } else if (role === "student") {
+    menuItems = [
+      ...menuItems,
+      { name: "My Courses", path: "/dashboard/courses", icon: <FaGraduationCap /> },
+      { name: "Assignments", path: "/dashboard/assignments", icon: <FaTasks /> },
+      { name: "Progress", path: "/dashboard/progress", icon: <FaChartBar /> },
+    ];
+  }
+
+  const handleLogout = () => setShowLogoutConfirm(true);
 
   const confirmLogout = () => {
     localStorage.removeItem("token");
@@ -44,48 +73,43 @@ const Sidebar: React.FC = () => {
   return (
     <>
       <aside
-        className={`bg-green-900/95 backdrop-blur-sm text-white min-h-screen p-2 flex flex-col shadow-lg transition-all duration-300 ${
+        className={`fixed z-50 bg-green-900/95 backdrop-blur-sm text-white min-h-screen p-2 flex flex-col shadow-lg transition-all duration-300 ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
-        {/* Collapse/Expand Button */}
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={onToggle}
           className="mb-4 text-white p-2 rounded hover:bg-green-800 transition self-end"
         >
           {collapsed ? <FaBars size={18} /> : <FaChevronLeft size={18} />}
         </button>
 
-        {/* Top section */}
-        {!collapsed && (
-          <div className="mb-6 px-2 py-3 bg-green-800 rounded-lg flex flex-col space-y-4 shadow-inner">
-            <h1 className="text-2xl font-bold text-center">Dashboard</h1>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 bg-green-700 px-2 py-1 rounded-full">
-                <FaUserCircle size={24} />
-                <span className="font-medium text-sm">Admin</span>
+      {!collapsed && (
+            <div className="mb-6 px-2 py-3 bg-green-800 rounded-lg flex flex-col space-y-4 shadow-inner">
+              <h1 className="text-2xl font-bold text-center">Dashboard</h1>
+              <div className="flex items-center justify-between">
+                {/* Updated Profile Picture Section */}
+                <div className="flex items-center space-x-3 bg-green-700 px-3 py-2 rounded-full">
+                  <FaUserCircle size={32} />
+                  <span className="font-medium text-base">{role}</span>
+                </div>
+                <button className="relative p-2 rounded-full hover:bg-green-700 transition">
+                  <FaBell size={18} />
+                  <span className="absolute top-0 right-0 inline-flex h-2 w-2 rounded-full bg-red-500"></span>
+                </button>
               </div>
-
-              <button className="relative p-2 rounded-full hover:bg-green-700 transition">
-                <FaBell size={18} />
-                <span className="absolute top-0 right-0 inline-flex h-2 w-2 rounded-full bg-red-500"></span>
-              </button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+                className="flex items-center justify-center gap-2 bg-red-600 w-full px-3 py-2 rounded-lg hover:bg-red-500 transition font-medium text-sm shadow-md"
+              >
+                <FaSignOutAlt />
+                Logout
+              </motion.button>
             </div>
+          )}
 
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleLogout}
-              className="flex items-center justify-center gap-2 bg-red-600 w-full px-3 py-2 rounded-lg hover:bg-red-500 transition font-medium text-sm shadow-md"
-            >
-              <FaSignOutAlt />
-              Logout
-            </motion.button>
-          </div>
-        )}
-
-        {/* Navigation */}
         <nav className="flex flex-col space-y-2 mt-2">
           {menuItems.map((item) => {
             const isActive = pathname === item.path;
@@ -114,42 +138,45 @@ const Sidebar: React.FC = () => {
         )}
       </aside>
 
-      {/* Logout Confirmation Modal */}
       <AnimatePresence>
-        {showLogoutConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-          >
+          {showLogoutConfirm && (
             <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.8 }}
-              className="bg-white rounded-xl p-6 shadow-xl w-80"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              // Replaced backdrop-blur-md with a simple dark overlay
+              className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
             >
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                Are you sure you want to logout?
-              </h3>
-              <div className="flex justify-end gap-4">
-                <button
-                  onClick={() => setShowLogoutConfirm(false)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-100 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmLogout}
-                  className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-500 transition"
-                >
-                  Logout
-                </button>
-              </div>
+              <motion.div
+                initial={{ scale: 0.8, y: 50 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.8, y: 50 }}
+                className="bg-white rounded-2xl p-6 shadow-2xl w-full max-w-sm text-center transform transition-transform duration-300"
+              >
+                <h3 className="text-xl font-bold mb-2 text-gray-800">
+                  Are you sure?
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  You will be logged out of your session.
+                </p>
+                <div className="flex justify-center gap-4">
+                  <button
+                    onClick={() => setShowLogoutConfirm(false)}
+                    className="px-6 py-2 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={confirmLogout}
+                    className="px-6 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-500 transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+        </AnimatePresence>
     </>
   );
 };
